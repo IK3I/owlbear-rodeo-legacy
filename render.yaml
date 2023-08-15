@@ -38,8 +38,8 @@ services:
     name: Owlbear Rodeo Backend
     runtime: docker
     region: oregon # optional (defaults to oregon) check other regions here: https://render.com/docs/regions
-    plan: free
-    branch: main
+    plan: starter
+    branch: secret-ice
     rootDir: ./backend
     dockerfilePath: ./Dockerfile
     numInstances: 1
