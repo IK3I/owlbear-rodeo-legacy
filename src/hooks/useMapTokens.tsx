@@ -68,11 +68,37 @@ function useMapTokens(
     attachedTokenStateIds: string[]
   ) {
     if (duplicateToken) {
+      // Trailing single letter (case insensitive) with optional leading text.
+      const alphaRegex: RegExp = /(?:^|(.*) )([a-yA-Y])$/;
+
+      // Trailing number with optional leading text.
+      const countRegex: RegExp = /(?:^|(.*) )(\d+)$/;
+
       let newStates: TokenState[] = [];
       for (let id of [tokenStateId, ...attachedTokenStateIds]) {
         const state = mapState?.tokens[id];
         if (state) {
           newStates.push({ ...state, id: uuid() });
+
+          // The original token state is what is being dragged. The new state is what is left in place of the original.
+          // So what we want to update is the original token state *after* spawning/dropping the new token state.
+          const alphaMatch: RegExpMatchArray | null = state.label.match(alphaRegex);
+          const countMatch: RegExpMatchArray | null = state.label.match(countRegex);
+
+          if (alphaMatch) {
+            const alpha: string = String.fromCharCode(alphaMatch[2].charCodeAt(0) + 1);
+
+            // They may have no leading text before the letter, so reconstruct the label in the same pattern as before
+            // but with the new letter.
+            state.label = !!alphaMatch[1] ? alphaMatch[1] + " " + alpha : String(alpha);
+          }
+          else if (countMatch) {
+            const count: number = parseInt(countMatch[2]) + 1;
+
+            // They may have no leading text before the number, so reconstruct the label in the same pattern as before
+            // but with the new number.
+            state.label = !!countMatch[1] ? countMatch[1] + " " + count : String(count);
+          }
         }
       }
       onTokensStateCreate(newStates);
